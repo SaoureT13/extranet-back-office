@@ -6,7 +6,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 You need to have:
 
-node v17.0.1
+### `node v17.0.1`
 
 You need to run:
 
