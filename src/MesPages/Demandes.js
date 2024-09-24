@@ -20,69 +20,77 @@ export async function demandesLoader() {
 }
 function Demandes() {
     const { data } = useLoaderData();
-    const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemPerPage = 5;
+    const [filteredData, setFilteredData] = useState(data);
+    const [currentData, setCurrentData] = useState([]);
 
     let indexOfLastItem = currentPage * itemPerPage;
     let indexOfFirstItem = indexOfLastItem - itemPerPage;
 
-    let currentData = data.slice(indexOfFirstItem, indexOfLastItem);
+    useEffect(() => {
+        setCurrentData(filteredData.slice(indexOfFirstItem, indexOfLastItem));
+    }, [currentPage, filteredData]);
 
     const handleNextPage = () => {
-        if (indexOfLastItem < data.length) {
-            setCurrentPage(currentPage + 1);
+        if (indexOfLastItem < filteredData.length) {
+            setCurrentPage((prevPage) => prevPage + 1);
         }
     };
+
     const handlePreviousPage = () => {
         if (indexOfFirstItem > 0) {
-            setCurrentPage(currentPage - 1);
+            setCurrentPage((prevPage) => prevPage - 1);
         }
     };
-
-    function handleSearchData(e) {
+    
+    const handleSearchData = (e) => {
         e.preventDefault();
-        const form = document.getElementById("search-form");
+        const form = document.getElementById("filter-form");
         const formData = new FormData(form);
+        const searchTerm = formData.get("search")?.toLowerCase() || "";
+        const statusFilter =
+            formData.get("choices-single-default")?.toLowerCase() || "";
 
-        console.log(formData.get("choices-single-default"));
-    }
+        const newFilteredData = data.filter((elem) => {
+            const matchesSearchTerm =
+                elem.str_socname.toLowerCase().includes(searchTerm) ||
+                elem.str_socmail.toLowerCase().includes(searchTerm) ||
+                elem.str_socstatut.toLowerCase().includes(searchTerm);
 
-    currentData = currentData.filter(
-        (elem) =>
-            elem.str_socname.toLowerCase().includes(searchTerm) ||
-            elem.str_socmail.toLowerCase().includes(searchTerm) ||
-            elem.str_socstatut.toLowerCase().includes(searchTerm)
-    );
+            const matchesStatusFilter =
+                statusFilter === "all" ||
+                elem.str_socstatut.toLowerCase().includes(statusFilter);
+
+            return matchesSearchTerm && matchesStatusFilter;
+        });
+
+        setFilteredData(newFilteredData);
+        setCurrentPage(1);
+    };
 
     return (
         <div className="row">
             <div className="col-lg-12">
                 <div className="card" id="invoiceList">
-                    <div className="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
-                        <div className="row g-3">
-                            <div className="col-xxl-8 col-sm-14">
-                                <div className="search-box">
-                                    <input
-                                        type="text"
-                                        className="form-control search bg-light border-light"
-                                        placeholder="Rechercher par libéllé société, email, statut"
-                                        value={searchTerm}
-                                        onChange={(e) =>
-                                            setSearchTerm(e.target.value)
-                                        }
-                                    />
-                                    <i className="ri-search-line search-icon" />
+                    <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
+                        <form id="filter-form">
+                            <div class="row g-3">
+                                <div class="col-xxl-8 col-sm-12">
+                                    <div class="search-box">
+                                        <input
+                                            type="text"
+                                            class="form-control search bg-light border-light"
+                                            placeholder="Search for customer, email, country, status or something..."
+                                            name="search"
+                                        />
+                                        <i class="ri-search-line search-icon"></i>
+                                    </div>
                                 </div>
-                            </div>
-                            {/*end col*/}
-
-                            {/*end col*/}
-                            <div className="col-xxl-3 col-sm-4">
-                                <div className="input-light">
-                                    <form id="search-form">
+                                <div class="col-xxl-3 col-sm-4">
+                                    <div class="input-light">
                                         <select
-                                            className="form-control"
+                                            class="form-control"
                                             name="choices-single-default"
                                             id="idStatus"
                                         >
@@ -90,30 +98,32 @@ function Demandes() {
                                             <option value="all" selected="">
                                                 All
                                             </option>
-                                            <option value="Validated">
+                                            <option value="process">
+                                                Process
+                                            </option>
+                                            <option value="validated">
                                                 Validated
                                             </option>
-                                            <option value="Cancel">
-                                                Cancel
+                                            <option value="canceled">
+                                                Canceled
                                             </option>
                                         </select>
-                                    </form>
+                                    </div>
+                                </div>
+
+                                <div class="col-xxl-1 col-sm-4">
+                                    <button
+                                        onClick={(e) => handleSearchData(e)}
+                                        type="button"
+                                        class="btn btn-primary w-100"
+                                        onclick="SearchData();"
+                                    >
+                                        <i class="ri-equalizer-fill me-1 align-bottom"></i>{" "}
+                                        Filters
+                                    </button>
                                 </div>
                             </div>
-                            {/*end col*/}
-                            <div className="col-xxl-1 col-sm-4">
-                                <button
-                                    type="button"
-                                    className="btn btn-primary w-100"
-                                    onClick={(e) => handleSearchData(e)}
-                                >
-                                    <i className="ri-equalizer-fill me-1 align-bottom" />{" "}
-                                    Filters
-                                </button>
-                            </div>
-                            {/*end col*/}
-                        </div>
-                        {/*end row*/}
+                        </form>
                     </div>
                     <div className="card-body">
                         <div>
