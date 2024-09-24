@@ -1,43 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-bs-theme="light" data-layout-width="fluid" data-layout-position="fixed" data-layout-style="default" data-sidebar-visibility="show"
+>
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
+    <meta name="description" content="Web site created using create-react-app" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
+    <base href="/extranetBackoffice/">
     <title>React App</title>
+    <link rel="shortcut icon" href="%PUBLIC_URL%/assets/images/favicon.ico">
+    <link href="assets/libs/jsvectormap/css/jsvectormap.min.css" rel="stylesheet" type="text/css" />
+    <script src="assets/js/layout.js"></script>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/app.min.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/custom.min.css" rel="stylesheet" type="text/css" />
+
+    <script>
+      // Fonction pour charger les valeurs de localStorage
+      function loadSettings() {
+        const layout = localStorage.getItem('layout') || 'vertical';
+        const topbar = localStorage.getItem('topbar') || 'light';
+        const sidebar = localStorage.getItem('sidebar') || 'dark';
+        const sidebarSize = localStorage.getItem('sidebarSize') || 'lg';
+        const sidebarImage = localStorage.getItem('sidebarImage') || 'none';
+        const preloader = localStorage.getItem('preloader') || 'disable';
+        const theme = localStorage.getItem('theme') || 'light';
+        const layoutWidth = localStorage.getItem('layoutWidth') || 'fluid';
+        const layoutPosition = localStorage.getItem('layoutPosition') || 'fixed';
+        const layoutStyle = localStorage.getItem('layoutStyle') || 'default';
+        const sidebarVisibility = localStorage.getItem('sidebarVisibility') || 'show';
+
+        document.documentElement.setAttribute('data-layout', layout);
+        document.documentElement.setAttribute('data-topbar', topbar);
+        document.documentElement.setAttribute('data-sidebar', sidebar);
+        document.documentElement.setAttribute('data-sidebar-size', sidebarSize);
+        document.documentElement.setAttribute('data-sidebar-image', sidebarImage);
+        document.documentElement.setAttribute('data-preloader', preloader);
+        document.documentElement.setAttribute('data-bs-theme', theme);
+        document.documentElement.setAttribute('data-layout-width', layoutWidth);
+        document.documentElement.setAttribute('data-layout-position', layoutPosition);
+        document.documentElement.setAttribute('data-layout-style', layoutStyle);
+        document.documentElement.setAttribute('data-sidebar-visibility', sidebarVisibility);
+      }
+
+      // Charger les paramètres au chargement de la page
+      window.onload = loadSettings;
+    </script>
+    
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
   </body>
 </html>
