@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { doRequest, urlBaseImage } from "../services/apiService";
-import { Link, useLoaderData } from "react-router-dom";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import TableRow from "../Mescomposants/TableRow";
 
 export async function demandesLoader() {
     let data = null;
@@ -11,7 +12,7 @@ export async function demandesLoader() {
     };
     try {
         const response = await doRequest(params);
-        data = response.data[0];
+        data = response.data["demandes"];
     } catch (error) {
         console.error(error);
     }
@@ -22,9 +23,8 @@ function Demandes() {
     const { data } = useLoaderData();
     const [currentPage, setCurrentPage] = useState(1);
     const itemPerPage = 5;
-    const [filteredData, setFilteredData] = useState(data);
+    const [filteredData, setFilteredData] = useState(data ?? []);
     const [currentData, setCurrentData] = useState([]);
-
     let indexOfLastItem = currentPage * itemPerPage;
     let indexOfFirstItem = indexOfLastItem - itemPerPage;
 
@@ -43,7 +43,7 @@ function Demandes() {
             setCurrentPage((prevPage) => prevPage - 1);
         }
     };
-    
+
     const handleSearchData = (e) => {
         e.preventDefault();
         const form = document.getElementById("filter-form");
@@ -72,11 +72,12 @@ function Demandes() {
     return (
         <div className="row">
             <div className="col-lg-12">
+                <h2>Demandes de creation de compte</h2>
                 <div className="card" id="invoiceList">
                     <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
                         <form id="filter-form">
                             <div class="row g-3">
-                                <div class="col-xxl-8 col-sm-12">
+                                <div class="col-xxl-8 col-sm-8">
                                     <div class="search-box">
                                         <input
                                             type="text"
@@ -87,31 +88,7 @@ function Demandes() {
                                         <i class="ri-search-line search-icon"></i>
                                     </div>
                                 </div>
-                                <div class="col-xxl-3 col-sm-4">
-                                    <div class="input-light">
-                                        <select
-                                            class="form-control"
-                                            name="choices-single-default"
-                                            id="idStatus"
-                                        >
-                                            <option value="">Status</option>
-                                            <option value="all" selected="">
-                                                All
-                                            </option>
-                                            <option value="process">
-                                                Process
-                                            </option>
-                                            <option value="validated">
-                                                Validated
-                                            </option>
-                                            <option value="canceled">
-                                                Canceled
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-xxl-1 col-sm-4">
+                                <div class=" col-sm-4">
                                     <button
                                         onClick={(e) => handleSearchData(e)}
                                         type="button"
@@ -150,9 +127,6 @@ function Demandes() {
                                                 </div>
                                             </th>
                                             <th className="text-uppercase">
-                                                ID
-                                            </th>
-                                            <th className="text-uppercase">
                                                 Libéllé société
                                             </th>
                                             <th className="text-uppercase">
@@ -174,14 +148,17 @@ function Demandes() {
                                         id="invoice-list-data"
                                     >
                                         {currentData && currentData.length > 0
-                                            ? currentData.map((demande) => {
-                                                  return (
-                                                      <TableRow
-                                                          demande={demande}
-                                                      />
-                                                  );
-                                              })
-                                            : ""}
+                                            ? currentData.map(
+                                                  (demande, index) => {
+                                                      return (
+                                                          <TableRow
+                                                              demande={demande}
+                                                              key={index}
+                                                          />
+                                                      );
+                                                  }
+                                              )
+                                            : <tr><td colSpan={6} className="text-center">Aucune demande...</td></tr>}
                                     </tbody>
                                 </table>
                                 <div
@@ -212,29 +189,31 @@ function Demandes() {
                                 </div>
                             </div>
                             <div className="d-flex justify-content-end mt-3">
-                                <div className="pagination-wrap hstack gap-2">
-                                    <button
-                                        onClick={handlePreviousPage}
-                                        className={`page-item pagination-prev ${
-                                            indexOfFirstItem - 1 < 0
-                                                ? "disabled"
-                                                : ""
-                                        }`}
-                                    >
-                                        Précedent
-                                    </button>
-                                    <ul className="pagination listjs-pagination mb-0" />
-                                    <button
-                                        onClick={handleNextPage}
-                                        className={`page-item pagination-next ${
-                                            indexOfLastItem + 1 > data.length
-                                                ? "disabled"
-                                                : "bg-[#F4F7F9]"
-                                        }`}
-                                    >
-                                        Suivant
-                                    </button>
-                                </div>
+                                {data && (
+                                    <div className="pagination-wrap hstack gap-2">
+                                        <button
+                                            onClick={handlePreviousPage}
+                                            className={`page-item pagination-prev ${
+                                                indexOfFirstItem - 1 < 0
+                                                    ? "disabled"
+                                                    : ""
+                                            }`}
+                                        >
+                                            Précedent
+                                        </button>
+                                        <button
+                                            onClick={handleNextPage}
+                                            className={`page-item pagination-next ${
+                                                indexOfLastItem + 1 >
+                                                data.length
+                                                    ? "disabled"
+                                                    : "bg-[#F4F7F9]"
+                                            }`}
+                                        >
+                                            Suivant
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -242,69 +221,6 @@ function Demandes() {
             </div>
             {/*end col*/}
         </div>
-    );
-}
-
-function TableRow({ demande }) {
-    return (
-        <tr>
-            <th scope="row">
-                <div className="form-check">
-                    <input
-                        className="form-check-input"
-                        type="checkbox"
-                        name="chk_child"
-                        defaultValue="#VL25000365"
-                    />
-                </div>
-            </th>
-            <td className="id">
-                <span className="fw-medium link-primary">
-                    {demande.lg_socid}
-                </span>
-            </td>
-            <td className="customer_name">
-                <div className="d-flex align-items-center">
-                    <img
-                        src={`${urlBaseImage}images/logos/${demande.lg_socid}/${demande.str_soclogo}`}
-                        alt=""
-                        className="avatar-xs rounded-circle me-2"
-                    />
-                    {demande.str_socname}
-                </div>
-            </td>
-            <td className="email">{demande.str_socmail}</td>
-            <td className="date">
-                {demande.dt_soccreated.split(" ")[0]}{" "}
-                <small className="text-muted">
-                    {demande.dt_soccreated.split(" ")[1]}
-                </small>
-            </td>
-            <td className="status">
-                <span
-                    className={`badge text-uppercase ${
-                        demande.str_socstatut === "process"
-                            ? "bg-warning-subtle text-warning"
-                            : demande.str_socstatut === "validated"
-                            ? "bg-success-subtle text-success"
-                            : "bg-danger-subtle text-danger"
-                    }`}
-                >
-                    {demande.str_socstatut}
-                </span>
-            </td>
-            <td>
-                <div className="dropdown">
-                    <Link
-                        to={`/dashboard/demandes-clients/${demande.lg_socid}`}
-                        className="btn btn-soft-secondary btn-sm dropdown"
-                    >
-                        Details
-                        <i class="ri-arrow-right-line align-middle"></i>
-                    </Link>
-                </div>
-            </td>
-        </tr>
     );
 }
 

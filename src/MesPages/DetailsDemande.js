@@ -13,7 +13,7 @@ export const detailsDemandeLoader = async ({ params }) => {
     };
     try {
         const response = await doRequest(requestParams);
-        data = response.data[0]["0"];
+        data = response.data["demande"][0];
     } catch (error) {
         console.error(error);
     }
@@ -112,8 +112,9 @@ function DetailsDemande() {
     const { data } = useLoaderData();
 
     const [currentData, setCurrentData] = useState(data);
+    console.log(currentData)
 
-    const files = currentData?.chemins.split(",");
+    const files = currentData?.gallery.split(",");
 
     return (
         <form className="vertical-navs-step">
@@ -409,7 +410,7 @@ function DetailsDemande() {
                                             </button>
                                         </div>
                                     ) : currentData.str_socstatut ===
-                                      "validated" ? (
+                                      "enable" ? (
                                         <p class="text-muted text-center">
                                             Demande validé
                                         </p>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 function CustomAppMenu() {
     return (
@@ -73,11 +73,110 @@ function CustomAppMenu() {
                                 style={{}}
                             >
                                 <ul className="nav nav-sm flex-column">
-                                    <NavItem title={"Demandes clients"} />
+                                    {/* <NavItem
+                                        title={"Demandes clients"}
+                                        href={"/dashboard/demandes-clients"}
+                                    /> */}
+                                    <ul className="nav nav-sm flex-column">
+                                        <li className="nav-item">
+                                            <a
+                                                href="#sidebarCalendar"
+                                                className="nav-link"
+                                                data-bs-toggle="collapse"
+                                                role="button"
+                                                aria-expanded="true"
+                                                aria-controls="sidebarCalendar"
+                                                data-key="t-calender"
+                                            >
+                                                Clients
+                                            </a>
+                                            <div
+                                                className="menu-dropdown collapse show"
+                                                id="sidebarCalendar"
+                                                style={{}}
+                                            >
+                                                <ul className="nav nav-sm flex-column">
+                                                    <li className="nav-item">
+                                                        <NavLink
+                                                            to="/dashboard/demandes-clients"
+                                                            className="nav-link"
+                                                            data-key="t-main-calender"
+                                                        >
+                                                            {" "}
+                                                            Demandes clients{" "}
+                                                        </NavLink>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    </ul>
                                 </ul>
                             </div>
                         </li>
 
+                        <li className="nav-item">
+                            <a
+                                className="nav-link menu-link"
+                                href="#sidebarAppsUser"
+                                data-bs-toggle="collapse"
+                                role="button"
+                                aria-expanded="true"
+                                aria-controls="sidebarAppsUser"
+                            >
+                                <i data-feather="home" className="icon-dual" />{" "}
+                                <span data-key="t-dashboards">
+                                    Utilisateurs
+                                </span>
+                            </a>
+                            <div
+                                className="menu-dropdown collapse show"
+                                id="sidebarAppsUser"
+                                style={{}}
+                            >
+                                <ul className="nav nav-sm flex-column">
+                                    <NavItem
+                                        title={"Liste utilisateurs"}
+                                        href={"/dashboard/liste-utilisateurs"}
+                                    />
+                                    <NavItem
+                                        title={"Création utilisateur"}
+                                        href={"/dashboard/creation-utilisateur"}
+                                    />
+                                    <NavItem
+                                        title={"Commandes"}
+                                        href={"/dashboard/commandes"}
+                                    />
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li className="nav-item">
+                            <a
+                                className="nav-link menu-link"
+                                href="#sidebarAppsPro"
+                                data-bs-toggle="collapse"
+                                role="button"
+                                aria-expanded="true"
+                                aria-controls="sidebarAppsPro"
+                            >
+                                <i data-feather="home" className="icon-dual" />{" "}
+                                <span data-key="t-dashboards">
+                                    Produits
+                                </span>
+                            </a>
+                            <div
+                                className="menu-dropdown collapse show"
+                                id="sidebarAppsPro"
+                                style={{}}
+                            >
+                                <ul className="nav nav-sm flex-column">
+                                    <NavItem
+                                        title={"Mise à jour des produits"}
+                                        href={"/dashboard/produits"}
+                                    />
+                                </ul>
+                            </div>
+                        </li>
                         {/* end Dashboard Menu */}
                     </ul>
                 </div>
@@ -88,10 +187,10 @@ function CustomAppMenu() {
     );
 }
 
-function NavItem({ title }) {
+function NavItem({ title, href }) {
     return (
         <li className="nav-item">
-            <NavLink to="/dashboard/demandes-clients" className="nav-link">
+            <NavLink to={href} className="nav-link">
                 {" "}
                 {title}
             </NavLink>

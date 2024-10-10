@@ -1,5 +1,3 @@
-// src/services/apiService.js
-
 import axios from "axios";
 
 const getRootUrl = (port) => {
@@ -24,7 +22,8 @@ const fullUrl = getFullUrl();
 
 // +++++++++++++++ FONCTION +++++++++++++++++++
 
-export const urlBaseImage = "http://localhost/backoffice/"; //alert(fullUrl+urlBaseImage); backoffice
+export const urlBaseImage = "http://localhost/extranetbackend/backoffice/";
+export const urlBaseImage2 = "http://localhost/" //alert(fullUrl+urlBaseImage); backoffice
 const rootUrl = fullUrl + "extranetbackend/backoffice/webservices/"; //Production //eticketbackend/
 localStorage.setItem("urlBaseImage", fullUrl + urlBaseImage);
 
@@ -76,16 +75,31 @@ const crudData = (params, apiUrl) => {
     });
 };
 
-export const doRequest = (params) => {
+export const doRequest = (params, apiUrl = "ConfigurationManager.php") => {
     const formData = new FormData();
     for (const key in params) {
         formData.append(key, params[key]);
     }
 
-    return axios.post(`${rootUrl}ConfigurationManager.php`, formData, {
+    return axios.post(`${rootUrl}${apiUrl}`, formData, {
         headers: {
             "Content-Type": "multipart/form-data",
         },
+        withCredentials: true,
+    });
+};
+
+export const doSignInRequest = (params) => {
+    const formData = new FormData();
+    for (const key in params) {
+        formData.append(key, params[key]);
+    }
+
+    return axios.post(`${rootUrl}Authentification.php`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
     });
 };
 
