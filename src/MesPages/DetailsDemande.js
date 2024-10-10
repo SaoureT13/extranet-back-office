@@ -242,7 +242,7 @@ function DetailsDemande() {
                                                 Type société
                                             </p>
                                             <p className="text-muted">
-                                                {currentData.str_lsttypesociete}
+                                                {currentData.str_typesociete}
                                             </p>
                                         </div>
                                         <div className="col-sm-6">
@@ -276,7 +276,7 @@ function DetailsDemande() {
                                             </p>
                                             <p className="text-muted">
                                                 {
-                                                    currentData.str_lstpaysdescription
+                                                    currentData.str_paysfacturation
                                                 }
                                             </p>
                                         </div>

@@ -43,7 +43,7 @@ function TableRow({ demande }) {
                     className={`badge text-uppercase ${
                         demande.str_socstatut === "process"
                             ? "bg-warning-subtle text-warning"
-                            : demande.str_socstatut === "validated"
+                            : demande.str_socstatut === "enable"
                             ? "bg-success-subtle text-success"
                             : "bg-danger-subtle text-danger"
                     }`}

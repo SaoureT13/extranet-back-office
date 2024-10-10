@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
 import { doRequest, urlBaseImage } from "../services/apiService";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import {
+    Link,
+    useLoaderData,
+    useLocation,
+    useNavigate,
+} from "react-router-dom";
 import TableRow from "../Mescomposants/TableRow";
 
-export async function demandesLoader() {
+export async function demandesLoader({ request }) {
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split("/");
+    const lastPart = pathParts[pathParts.length - 1];
     let data = null;
     const params = {
         mode: "getClientDemandes",
         STR_UTITOKEN: "dfgfgsd",
-        STR_SOCSTATUT: "process",
+        STR_SOCSTATUT: lastPart === "toutes" ? "process" : "enable",
     };
     try {
         const response = await doRequest(params);
@@ -27,6 +35,9 @@ function Demandes() {
     const [currentData, setCurrentData] = useState([]);
     let indexOfLastItem = currentPage * itemPerPage;
     let indexOfFirstItem = indexOfLastItem - itemPerPage;
+    const url = useLocation();
+    const pathParts = url.pathname.split("/");
+    const lastPart = pathParts[pathParts.length - 1];
 
     useEffect(() => {
         setCurrentData(filteredData.slice(indexOfFirstItem, indexOfLastItem));
@@ -72,7 +83,10 @@ function Demandes() {
     return (
         <div className="row">
             <div className="col-lg-12">
-                <h2>Demandes de creation de compte</h2>
+                <h2>
+                    Demandes de creation de compte{" "}
+                    {lastPart === "toutes" ? "" : "approuvées"}
+                </h2>
                 <div className="card" id="invoiceList">
                     <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
                         <form id="filter-form">
@@ -147,18 +161,28 @@ function Demandes() {
                                         className="list form-check-all"
                                         id="invoice-list-data"
                                     >
-                                        {currentData && currentData.length > 0
-                                            ? currentData.map(
-                                                  (demande, index) => {
-                                                      return (
-                                                          <TableRow
-                                                              demande={demande}
-                                                              key={index}
-                                                          />
-                                                      );
-                                                  }
-                                              )
-                                            : <tr><td colSpan={6} className="text-center">Aucune demande...</td></tr>}
+                                        {currentData &&
+                                        currentData.length > 0 ? (
+                                            currentData.map(
+                                                (demande, index) => {
+                                                    return (
+                                                        <TableRow
+                                                            demande={demande}
+                                                            key={index}
+                                                        />
+                                                    );
+                                                }
+                                            )
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan={6}
+                                                    className="text-center"
+                                                >
+                                                    Aucune demande...
+                                                </td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                                 <div

@@ -98,12 +98,20 @@ function CustomAppMenu() {
                                                 <ul className="nav nav-sm flex-column">
                                                     <li className="nav-item">
                                                         <NavLink
-                                                            to="/dashboard/demandes-clients"
+                                                            to="/dashboard/demandes-clients/toutes"
                                                             className="nav-link"
                                                             data-key="t-main-calender"
                                                         >
                                                             {" "}
                                                             Demandes clients{" "}
+                                                        </NavLink>
+                                                        <NavLink
+                                                            to="/dashboard/demandes-clients/approuvées"
+                                                            className="nav-link"
+                                                            data-key="t-main-calender"
+                                                        >
+                                                            {" "}
+                                                            Demandes clients approuvées{" "}
                                                         </NavLink>
                                                     </li>
                                                 </ul>

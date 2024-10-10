@@ -43,7 +43,12 @@ const router = createBrowserRouter(
             element: <Dashboard />,
             children: [
                 {
-                    path: "/dashboard/demandes-clients",
+                    path: "/dashboard/demandes-clients/toutes",
+                    loader: demandesLoader,
+                    element: <Demandes />,
+                },
+                {
+                    path: "/dashboard/demandes-clients/approuvées",
                     loader: demandesLoader,
                     element: <Demandes />,
                 },
@@ -74,22 +79,23 @@ const router = createBrowserRouter(
                 {
                     path: "/dashboard/commandes",
                     loader: commandesLoader,
-                    element: <Commandes/>   ,
+                    element: <Commandes />,
                 },
                 {
                     path: "/dashboard/statistiques-produits",
-                    element: <ProductStat/>   ,
-                }, {
+                    element: <ProductStat />,
+                },
+                {
                     path: "/dashboard/produits",
                     loader: produitsLoader,
-                    element: <ListProduct/>
+                    element: <ListProduct />,
                 },
 
                 {
                     path: "/dashboard/produits/:productID",
                     loader: produitLoader,
-                    element: <Product/>
-                }
+                    element: <Product />,
+                },
             ],
             // loader: dashboardLoader,  // Loader pour Dashboard
         },
