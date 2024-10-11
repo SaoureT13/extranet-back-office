@@ -2,31 +2,56 @@ import React, { useEffect, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { doRequest, urlBaseImage, urlBaseImage2 } from "../services/apiService";
 import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import "../App.css";
+import axios from "axios";
+import Select from "react-select";
 
 export async function produitLoader({ params }) {
     let data = null;
-    const paramsRequest = {
-        mode: "getProduct",
-        LG_PROID: params.productID,
-    };
+    let data2 = null;
+
+    const formData1 = new FormData();
+    formData1.append("mode", "getProduct");
+    formData1.append("LG_PROID", params.productID);
+
+    const formData2 = new FormData();
+    formData2.append("mode", "listProduct");
+
     try {
-        const response = await doRequest(paramsRequest, "StockManager.php");
-        data = response.data["products"][0];
+        const [response1, response2] = await Promise.all([
+            axios.post(
+                "http://localhost/extranetbackend/backoffice/webservices/StockManager.php",
+                formData1
+            ),
+            axios.post(
+                "http://localhost/extranetbackend/backoffice/webservices/StockManager.php",
+                formData2
+            ),
+        ]);
+        data = response1.data["products"][0];
+        data2 = response2.data["products"];
     } catch (error) {
         console.error(error);
     }
 
-    return { data };
+    return { data, data2 };
 }
 
 function Product() {
-    const { data } = useLoaderData();
+    const { data, data2 } = useLoaderData();
     const { productID } = useParams();
     const [mainImage, setMainImage] = useState(null);
     const [thumbnails, setThumbnails] = useState([]);
     const [mainImagePreview, setMainImagePreview] = useState(null);
     const [thumbnailPreviews, setThumbnailPreviews] = useState([]);
-    const [errorMessage, setErrorMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState({
+        mainImage: "",
+        thumbnails: "",
+        substitutionProducts: "",
+    });
+    const [options, setOptions] = useState([]);
     const [productSelectData, setProductSelectData] = useState("");
     const [isMainImageValid, setMainImageValid] = useState(false);
     const [validGallery, setValidGallery] = useState([]);
@@ -43,6 +68,25 @@ function Product() {
         showSuccess: false,
     });
 
+    const handleProductSelectChange = (selected) => {
+        setProductSelectData(selected);
+    };
+
+    console.log(productSelectData);
+
+    useEffect(() => {
+        if (data2 != null) {
+            const opt = data2.map((product) => {
+                return {
+                    value: product.ArtID,
+                    label: product.ArtLib,
+                };
+            });
+
+            setOptions(opt);
+        }
+    }, [data2]);
+
     useEffect(() => {
         // Vérifier l'image principale
         const mainImage = new Image();
@@ -54,10 +98,12 @@ function Product() {
         const validImages = [];
         data.gallerie.forEach((image) => {
             const img = new Image();
-            img.src = `${urlBaseImage}/images/produits/${
-                data.ArtID
-            }/${image.src.trim()}`;
-            img.onload = () => validImages.push(image.src.trim());
+            img.src = `http://localhost/${image.src.trim()}`;
+            img.onload = () =>
+                validImages.push({
+                    src: image.src.trim(),
+                    lg_docid: image.lg_docid,
+                });
             img.onerror = () => {};
         });
 
@@ -96,7 +142,10 @@ function Product() {
     const handleMainImageChange = (event) => {
         const file = event.target.files[0];
         if (file && acceptedImageTypes.includes(file.type)) {
-            setErrorMessage(""); // Efface l'erreur si le type est valide
+            setErrorMessage((prevState) => ({
+                ...prevState,
+                mainImage: "",
+            })); // Efface l'erreur si le type est valide
             setMainImage(file);
 
             // Prévisualisation de l'image principale
@@ -106,9 +155,11 @@ function Product() {
             };
             reader.readAsDataURL(file);
         } else {
-            setErrorMessage(
-                "L'image principale doit être un fichier valide (jpeg, png, gif, webp)"
-            );
+            setErrorMessage((prevState) => ({
+                ...prevState,
+                mainImage:
+                    "L'image principale doit être un fichier valide (jpeg, png, gif, webp)",
+            }));
             setMainImage(null);
             setMainImagePreview(null);
         }
@@ -122,16 +173,20 @@ function Product() {
         // Validation des types d'image pour chaque miniature
         for (let i = 0; i < files.length; i++) {
             if (!acceptedImageTypes.includes(files[i].type)) {
-                setErrorMessage(
-                    `La miniature ${files[i].name} doit être un fichier valide (jpeg, png, gif, webp)`
-                );
+                setErrorMessage((prevState) => ({
+                    ...prevState,
+                    thumbnails: `La miniature ${files[i].name} doit être un fichier valide (jpeg, png, gif, webp)`,
+                }));
                 valid = false;
                 break;
             }
         }
 
         if (valid) {
-            setErrorMessage("");
+            setErrorMessage((prevState) => ({
+                ...prevState,
+                thumbnails: "",
+            }));
             setThumbnails(files);
 
             // Prévisualisation des miniatures
@@ -151,14 +206,24 @@ function Product() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        const errors = {};
 
-        if (!mainImage) {
-            setErrorMessage("L'image principale est requise.");
-            return;
+        if (!mainImage && !isMainImageValid) {
+            errors.mainImage = "L'image principale est requise.";
         }
 
-        if (thumbnails.length === 0) {
-            setErrorMessage("Veuillez sélectionner au moins une miniature.");
+        if (thumbnails.length === 0 && validGallery.length === 0) {
+            errors.thumbnails = "Veuillez sélectionner au moins une miniature.";
+        }
+
+        // if (productSelectData.length === 0) {
+        //     errors.substitutionProducts =
+        //         "Veuillez sélectionner au moins un produit de substitution.";
+        // }
+
+        if (Object.keys(errors).length > 0) {
+            setErrorMessage(errors);
+            console.log("errors", errors);
             return;
         }
 
@@ -179,6 +244,16 @@ function Product() {
         formData.append("mode", "uploadProductPicture");
         formData.append("LG_PROID", productID);
         formData.append("STR_UTITOKEN", currentUser.STR_UTITOKEN);
+        if (productSelectData.length > 0) {
+            let SUBSTITUTION_PRODUCTS = "";
+            for (let i = 0; i < productSelectData.length; i++) {
+                SUBSTITUTION_PRODUCTS += productSelectData[i].value;
+                if (i < productSelectData.length - 1) {
+                    SUBSTITUTION_PRODUCTS += ",";
+                }
+            }
+            formData.append("SUBSTITUTION_PRODUCTS", SUBSTITUTION_PRODUCTS);
+        }
 
         try {
             const response = await fetch(
@@ -193,11 +268,56 @@ function Product() {
             console.log("Success:", result);
             handleSetShowSuccess();
             navigate(".", { replace: true });
+            setThumbnails([]);
+            setMainImage(null);
+            setThumbnailPreviews([]);
+            setMainImagePreview(null);
+            setProductSelectData([]);
         } catch (error) {
             handleSetShowError();
             console.error("Error:", error);
         }
     };
+
+    const handleRemoveProduitSubstitution = async (LG_PROSUBID) => {
+        const params = {
+            mode: "deleteProduitSubstitution",
+            LG_PROSUBID: LG_PROSUBID,
+        };
+        try {
+            const response = await doRequest(
+                params,
+                "ConfigurationManager.php"
+            );
+            const data = response.data["code_statut"];
+            if (data == "1") {
+                navigate(".", { replace: true });
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
+    const handleRemoveThumbails = async (LG_DOCID) => {
+        const params = {
+            mode: "deleteProductImage",
+            LG_DOCID: LG_DOCID,
+        };
+
+        try {
+            const response = await doRequest(
+                params,
+                "ConfigurationManager.php"
+            );
+            const data = response.data["code_statut"];
+            if (data == "1") {
+                navigate(".", { replace: true });
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
     return (
         <>
             <div className="row justify-content-center">
@@ -265,161 +385,236 @@ function Product() {
                                         </div>
                                     )}
                                 </div>
-                                {/*end row*/}
-                            </div>
-                            <div className="card-body p-4">
-                                <div className="row g-3">
-                                    <div className="col-sm-6">
-                                        <label
-                                            htmlFor="str_proname"
-                                            className="form-label"
-                                        >
-                                            Nom du produit
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="str_proname"
-                                            disabled
-                                            defaultValue={data.ArtLib}
-                                        />
-                                    </div>
-                                    <div className="col-sm-6">
-                                        <label
-                                            htmlFor="str_prodescription"
-                                            className="form-label"
-                                        >
-                                            Description
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="str_prodescription"
-                                            defaultValue={data.ArtLib}
-                                            disabled
-                                        />
-                                    </div>
 
-                                    <div className="col-md-6">
-                                        <label
-                                            htmlFor="int_propriceachat"
-                                            className="form-label"
-                                        >
-                                            Prix d'achat{" "}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="int_propriceachat"
-                                            defaultValue={`${data.ArtPrixBase} FCFA`}
-                                            disabled
-                                        />
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label
-                                            htmlFor="int_propricevente"
-                                            className="form-label"
-                                        >
-                                            Prix de vente{" "}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="int_propricevente"
-                                            defaultValue={`${data.ArtPrixBase} FCFA`}
-                                            disabled
-                                        />
-                                    </div>
-                                    {isMainImageValid && (
-                                        <div>
-                                            <div>
-                                                <h1>Image principale</h1>
-                                                <img
-                                                    src={`${urlBaseImage}/images/produits/${data.ArtID}/${data.str_propic}`}
-                                                    alt=""
-                                                    style={{
-                                                        width: "200px",
-                                                        height: "200px",
-                                                        margin: "5px",
-                                                    }}
-                                                />
+                                <div className="card-body p-4">
+                                    <div className="row g-3">
+                                        <div className="col-sm-6">
+                                            <label
+                                                htmlFor="str_proname"
+                                                className="form-label"
+                                            >
+                                                Nom du produit
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="str_proname"
+                                                disabled
+                                                defaultValue={data.ArtLib}
+                                            />
+                                        </div>
+                                        <div className="col-sm-6">
+                                            <label
+                                                htmlFor="str_prodescription"
+                                                className="form-label"
+                                            >
+                                                Description
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="str_prodescription"
+                                                defaultValue={data.ArtLib}
+                                                disabled
+                                            />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label
+                                                htmlFor="int_propriceachat"
+                                                className="form-label"
+                                            >
+                                                Prix d'achat{" "}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="int_propriceachat"
+                                                defaultValue={`${data.ArtPrixBase} FCFA`}
+                                                disabled
+                                            />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label
+                                                htmlFor="int_propricevente"
+                                                className="form-label"
+                                            >
+                                                Prix de vente{" "}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="int_propricevente"
+                                                defaultValue={`${data.ArtPrixBase} FCFA`}
+                                                disabled
+                                            />
+                                        </div>
+                                        {data.substitutionList && (
+                                            <div className="col-md-12">
+                                                <label
+                                                    htmlFor="int_propricevente"
+                                                    className="form-label"
+                                                >
+                                                    Produits de subsitution{" "}
+                                                </label>
+                                                <div>
+                                                    {data.substitutionList.map(
+                                                        (
+                                                            substitution,
+                                                            index
+                                                        ) => (
+                                                            <span
+                                                                key={index}
+                                                                className="badge bg-primary m-1 p-2"
+                                                            >
+                                                                {
+                                                                    substitution.ArtLib
+                                                                }
+                                                                <span
+                                                                    style={{
+                                                                        cursor: "pointer",
+                                                                        marginLeft:
+                                                                            "10px",
+                                                                    }}
+                                                                    onClick={() =>
+                                                                        handleRemoveProduitSubstitution(
+                                                                            substitution.lg_prosubid
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    &times;
+                                                                </span>
+                                                            </span>
+                                                        )
+                                                    )}
+                                                </div>
                                             </div>
+                                        )}
+                                        {isMainImageValid ? (
+                                            <div>
+                                                <div>
+                                                    <h1>Image principale</h1>
+                                                    <img
+                                                        src={`${urlBaseImage}/images/produits/${data.ArtID}/${data.str_propic}`}
+                                                        alt=""
+                                                        style={{
+                                                            width: "200px",
+                                                            height: "200px",
+                                                            margin: "5px",
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div class="col-12">
+                                                <label
+                                                    htmlFor="mainImage"
+                                                    className="form-label"
+                                                >
+                                                    Photo de principale
+                                                    <span className="text-muted">
+                                                        (Optionnelle)
+                                                    </span>
+                                                </label>
+                                                <div class="input-group">
+                                                    <input
+                                                        type="file"
+                                                        class="form-control"
+                                                        id="mainImage"
+                                                        accept="image/*"
+                                                        onChange={
+                                                            handleMainImageChange
+                                                        }
+                                                    />
+                                                </div>
+                                                {mainImagePreview && (
+                                                    <div>
+                                                        <h4>
+                                                            Prévisualisation de
+                                                            l'image principale :
+                                                        </h4>
+                                                        <img
+                                                            src={
+                                                                mainImagePreview
+                                                            }
+                                                            alt="Preview principale"
+                                                            style={{
+                                                                width: "200px",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+                                                {errorMessage.mainImage && (
+                                                    <p
+                                                        style={{
+                                                            color: "red",
+                                                        }}
+                                                        className="m-0 p-0"
+                                                    >
+                                                        {errorMessage.mainImage}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+                                        {validGallery.length > 0 ? (
                                             <div>
                                                 <h1>Image secondaire</h1>
-                                                {data.gallerie.length > 0 &&
-                                                    data.gallerie.map(
-                                                        (image, index) => (
+                                                {validGallery.map(
+                                                    (image, index) => (
+                                                        <div
+                                                            style={{
+                                                                display:
+                                                                    "inline-block",
+                                                                position:
+                                                                    "relative",
+                                                                width: "200px",
+                                                                height: "200px",
+                                                                margin: "5px",
+                                                            }}
+                                                        >
                                                             <img
                                                                 key={index}
-                                                                src={`${urlBaseImage2}${image.src}`}
+                                                                src={`http://localhost/${image.src}`}
                                                                 alt=""
                                                                 style={{
                                                                     width: "200px",
                                                                     height: "200px",
-                                                                    margin: "5px",
                                                                     objectFit:
                                                                         "contain",
                                                                 }}
                                                             />
-                                                        )
-                                                    )}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {isMainImageValid == false &&
-                                        isMainImageValid == false && (
-                                            <>
-                                                <div class="col-12">
-                                                    <label
-                                                        htmlFor="mainImage"
-                                                        className="form-label"
-                                                    >
-                                                        Photo de principale
-                                                        <span className="text-muted">
-                                                            (Optionnelle)
-                                                        </span>
-                                                    </label>
-                                                    <div class="input-group">
-                                                        <input
-                                                            type="file"
-                                                            class="form-control"
-                                                            id="mainImage"
-                                                            accept="image/*"
-                                                            onChange={
-                                                                handleMainImageChange
-                                                            }
-                                                        />
-                                                    </div>
-                                                    {mainImagePreview && (
-                                                        <div>
-                                                            <h4>
-                                                                Prévisualisation
-                                                                de l'image
-                                                                principale :
-                                                            </h4>
-                                                            <img
-                                                                src={
-                                                                    mainImagePreview
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    handleRemoveThumbails(
+                                                                        image.lg_docid
+                                                                    )
                                                                 }
-                                                                alt="Preview principale"
-                                                                style={{
-                                                                    width: "200px",
-                                                                }}
-                                                            />
+                                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary"
+                                                            >
+                                                                {" "}
+                                                                <svg
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 24 24"
+                                                                    width="24px"
+                                                                    height="24px"
+                                                                >
+                                                                    <path d="M 10 2 L 9 3 L 4 3 L 4 5 L 5 5 L 5 20 C 5 20.522222 5.1913289 21.05461 5.5683594 21.431641 C 5.9453899 21.808671 6.4777778 22 7 22 L 17 22 C 17.522222 22 18.05461 21.808671 18.431641 21.431641 C 18.808671 21.05461 19 20.522222 19 20 L 19 5 L 20 5 L 20 3 L 15 3 L 14 2 L 10 2 z M 7 5 L 17 5 L 17 20 L 7 20 L 7 5 z M 9 7 L 9 18 L 11 18 L 11 7 L 9 7 z M 13 7 L 13 18 L 15 18 L 15 7 L 13 7 z" />
+                                                                </svg>{" "}
+                                                            </button>
                                                         </div>
-                                                    )}
-                                                </div>
+                                                    )
+                                                )}
                                                 <div class="col-12">
                                                     <label
                                                         htmlFor="thumbnail"
-                                                        className="form-label"
+                                                        className="form-label d-none"
                                                     >
                                                         Photo secondaires
                                                         <span className="text-muted">
                                                             (Optionnelle)
                                                         </span>
                                                     </label>
-                                                    <div class="input-group">
+                                                    <div class="input-group mt-1">
                                                         <input
                                                             type="file"
                                                             class="form-control"
@@ -460,19 +655,146 @@ function Product() {
                                                             )}
                                                         </div>
                                                     )}
+                                                    {errorMessage.thumbnails && (
+                                                        <p
+                                                            style={{
+                                                                color: "red",
+                                                            }}
+                                                            className="m-0 p-0"
+                                                        >
+                                                            {
+                                                                errorMessage.thumbnails
+                                                            }
+                                                        </p>
+                                                    )}
                                                 </div>
-                                                {errorMessage && (
-                                                    <p style={{ color: "red" }}>
-                                                        {errorMessage}
+                                            </div>
+                                        ) : (
+                                            <div class="col-12">
+                                                <label
+                                                    htmlFor="thumbnail"
+                                                    className="form-label"
+                                                >
+                                                    Photo secondaires
+                                                    <span className="text-muted">
+                                                        (Optionnelle)
+                                                    </span>
+                                                </label>
+                                                <div class="input-group">
+                                                    <input
+                                                        type="file"
+                                                        class="form-control"
+                                                        id="thumbnail"
+                                                        accept="image/*"
+                                                        multiple
+                                                        onChange={
+                                                            handleThumbnailsChange
+                                                        }
+                                                    />
+                                                </div>
+                                                {thumbnailPreviews.length >
+                                                    0 && (
+                                                    <div>
+                                                        <h4>
+                                                            Prévisualisation des
+                                                            miniatures :
+                                                        </h4>
+                                                        {thumbnailPreviews.map(
+                                                            (
+                                                                thumbnail,
+                                                                index
+                                                            ) => (
+                                                                <img
+                                                                    key={index}
+                                                                    src={
+                                                                        thumbnail
+                                                                    }
+                                                                    alt={`Preview ${index}`}
+                                                                    style={{
+                                                                        width: "100px",
+                                                                        margin: "5px",
+                                                                    }}
+                                                                />
+                                                            )
+                                                        )}
+                                                    </div>
+                                                )}
+                                                {errorMessage.thumbnails && (
+                                                    <p
+                                                        style={{
+                                                            color: "red",
+                                                        }}
+                                                        className="m-0 p-0"
+                                                    >
+                                                        {
+                                                            errorMessage.thumbnails
+                                                        }
                                                     </p>
                                                 )}
-                                            </>
+                                            </div>
                                         )}
-                                </div>
+                                        <div className="col-md-12 p-2">
+                                            <label
+                                                className=""
+                                                htmlFor="substitution-products"
+                                            >
+                                                Choisir des produits de
+                                                subsititution:
+                                            </label>
+                                            {data2 != null && (
+                                                <Select
+                                                    isMulti
+                                                    name="colors"
+                                                    options={options}
+                                                    className="basic-multi-select"
+                                                    classNamePrefix="select"
+                                                    onChange={
+                                                        handleProductSelectChange
+                                                    }
+                                                    value={productSelectData}
+                                                />
+                                            )}
 
-                                {/*end row*/}
-                                {isMainImageValid == false &&
-                                    isMainImageValid == false && (
+                                            {/* <select
+                                                id="substitution-products"
+                                                className="form-select"
+                                                size={4}
+                                                aria-label="size 3 select example"
+                                                multiple={true}
+                                                onChange={
+                                                    handleProductSelectChange
+                                                }
+                                            >
+                                                {data2 != null &&
+                                                    data2?.map(
+                                                        (product, index) => (
+                                                            <option
+                                                                key={index}
+                                                                value={
+                                                                    product.ArtID
+                                                                }
+                                                            >
+                                                                {product.ArtLib}
+                                                            </option>
+                                                        )
+                                                    )}
+                                            </select> */}
+                                            {errorMessage.substitutionProducts && (
+                                                <p
+                                                    style={{
+                                                        color: "red",
+                                                    }}
+                                                    className="m-0 p-0"
+                                                >
+                                                    {
+                                                        errorMessage.substitutionProducts
+                                                    }
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {isMainImageValid === false ||
+                                    validGallery.length < 0 ? (
                                         <div className="hstack gap-2 justify-content-end d-print-none mt-4">
                                             <Link
                                                 type="reset"
@@ -486,70 +808,49 @@ function Product() {
                                                 className="btn btn-danger"
                                             >
                                                 <i className="ri-send-plane-fill align-bottom me-1" />{" "}
-                                                Uploader les images
+                                                Envoyer
                                             </button>
                                         </div>
+                                    ) : (
+                                        <div className="hstack gap-2 justify-content-end d-print-none mt-4">
+                                            <Link
+                                                type="reset"
+                                                to="/dashboard/produits"
+                                                className="btn btn-primary"
+                                            >
+                                                Annuler
+                                            </Link>
+                                            {mainImage ||
+                                            thumbnails.length > 0 ||
+                                            productSelectData.length > 0 ? (
+                                                <button
+                                                    type="submit"
+                                                    className="btn btn-danger"
+                                                >
+                                                    <i className="ri-send-plane-fill align-bottom me-1" />{" "}
+                                                    Mettre à jour
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    type="submit"
+                                                    className="btn btn-danger"
+                                                    disabled
+                                                >
+                                                    <i className="ri-send-plane-fill align-bottom me-1" />{" "}
+                                                    Mettre à jour
+                                                </button>
+                                            )}
+                                        </div>
                                     )}
+                                </div>
                             </div>
                         </form>
                     </div>
                 </div>
                 {/*end col*/}
             </div>
-            {/* <div className="row justify-content-center">
-                <div className="col-xxl-9">
-                    <div className="card">
-                        <form onSubmit={handleSubmit}>
-                            <h2 className="p-2">
-                                Ajouté des produits de substitution
-                            </h2>
-                            <div className="col-lg-6 p-2">
-                                <h4 className="">Produits</h4>
-                                <select
-                                    className="form-select"
-                                    size={3}
-                                    aria-label="size 3 select example"
-                                >
-                                    <option selected="">
-                                        Open this select menu (select menu size)
-                                    </option>
-                                    {productSelectData != null &&
-                                        productSelectData?.map(
-                                            (product, index) => (
-                                                <option
-                                                    key={index}
-                                                    value={product.lg_proid}
-                                                >
-                                                    {product.str_proname}
-                                                </option>
-                                            )
-                                        )}
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div> */}
         </>
     );
-}
-
-function verifyImagePath(path) {
-    return new Promise((resolve) => {
-        const img = new Image();
-
-        // Lorsque l'image se charge avec succès
-        img.onload = () => {
-            resolve(path); // Retourne le chemin de l'image
-        };
-
-        // Si l'image ne peut pas être chargée (chemin invalide ou fichier non image)
-        img.onerror = () => {
-            resolve(null); // Retourne null si ce n'est pas une image
-        };
-
-        img.src = path; // Définit la source de l'image
-    });
 }
 
 export default Product;

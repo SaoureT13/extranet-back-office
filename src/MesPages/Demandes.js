@@ -84,8 +84,9 @@ function Demandes() {
         <div className="row">
             <div className="col-lg-12">
                 <h2>
-                    Demandes de creation de compte{" "}
-                    {lastPart === "toutes" ? "" : "approuvées"}
+                    {lastPart === "toutes"
+                        ? "Demandes de creation de compte"
+                        : "Liste des clients"}
                 </h2>
                 <div className="card" id="invoiceList">
                     <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">

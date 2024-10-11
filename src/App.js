@@ -24,6 +24,7 @@ import Commandes, { commandesLoader } from "./MesPages/Commandes";
 import ProductStat from "./MesPages/ProductStat";
 import ListProduct, { produitsLoader } from "./MesPages/ListProduct";
 import Product, { produitLoader } from "./MesPages/Product";
+import Planning from "./MesPages/Planning";
 
 // import About from './pages/Accueil/About';
 
@@ -95,6 +96,10 @@ const router = createBrowserRouter(
                     path: "/dashboard/produits/:productID",
                     loader: produitLoader,
                     element: <Product />,
+                },
+                {
+                    path: "/dashboard/gestion-planning",
+                    element: <Planning />,
                 },
             ],
             // loader: dashboardLoader,  // Loader pour Dashboard

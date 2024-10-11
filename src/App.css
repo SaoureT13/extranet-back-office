@@ -1,0 +1,24 @@
+.editor-container {
+    height: 200px; /* Définir une hauteur pour le conteneur parent */
+    display: flex;
+    flex-direction: column;
+}
+
+.quill-editor {
+    flex-grow: 1; /* Permet à l'éditeur de s'étendre pour remplir l'espace */
+    display: flex;
+    flex-direction: column;
+}
+ 
+.ql-container .quill-editor {
+    flex-grow: 1; /* Permet au conteneur interne d'occuper tout l'espace */
+    height: 200px !important; /* S'assurer que le conteneur interne prend 100% de la hauteur */
+    overflow-y: auto; /* Gérer le défilement vertical si le contenu dépasse */
+}
+
+.ql-container{
+    border: 1px solid red;
+    border-radius: 4px;
+    padding: 4px;
+    height: 200px !important;
+}

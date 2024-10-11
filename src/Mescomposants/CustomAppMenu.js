@@ -111,7 +111,7 @@ function CustomAppMenu() {
                                                             data-key="t-main-calender"
                                                         >
                                                             {" "}
-                                                            Demandes clients approuvées{" "}
+                                                            Liste des clients{" "}
                                                         </NavLink>
                                                     </li>
                                                 </ul>
@@ -168,9 +168,7 @@ function CustomAppMenu() {
                                 aria-controls="sidebarAppsPro"
                             >
                                 <i data-feather="home" className="icon-dual" />{" "}
-                                <span data-key="t-dashboards">
-                                    Produits
-                                </span>
+                                <span data-key="t-dashboards">Produits</span>
                             </a>
                             <div
                                 className="menu-dropdown collapse show"
@@ -181,6 +179,33 @@ function CustomAppMenu() {
                                     <NavItem
                                         title={"Mise à jour des produits"}
                                         href={"/dashboard/produits"}
+                                    />
+                                </ul>
+                            </div>
+                        </li>
+                        <li className="nav-item">
+                            <a
+                                className="nav-link menu-link"
+                                href="#sidebarAppsGes"
+                                data-bs-toggle="collapse"
+                                role="button"
+                                aria-expanded="true"
+                                aria-controls="sidebarAppsGes"
+                            >
+                                <i data-feather="home" className="icon-dual" />{" "}
+                                <span data-key="t-dashboards">
+                                    Gestion planning
+                                </span>
+                            </a>
+                            <div
+                                className="menu-dropdown collapse show"
+                                id="sidebarAppsGes"
+                                style={{}}
+                            >
+                                <ul className="nav nav-sm flex-column">
+                                    <NavItem
+                                        title={"Creation de lignes"}
+                                        href={"/dashboard/gestion-planning"}
                                     />
                                 </ul>
                             </div>
