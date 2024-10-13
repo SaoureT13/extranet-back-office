@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { doRequest, urlBaseImage } from "../services/apiService";
+import { doRequest } from "../services/apiService";
 import {
-    Link,
     useLoaderData,
     useLocation,
     useNavigate,
@@ -28,6 +27,7 @@ export async function demandesLoader({ request }) {
     return { data };
 }
 function Demandes() {
+    const navigate = useNavigate();
     const { data } = useLoaderData();
     const [currentPage, setCurrentPage] = useState(1);
     const itemPerPage = 5;
@@ -38,6 +38,14 @@ function Demandes() {
     const url = useLocation();
     const pathParts = url.pathname.split("/");
     const lastPart = pathParts[pathParts.length - 1];
+
+    useEffect(() => {
+        const user = localStorage.getItem('user');
+
+        if (!user) {
+            navigate('//sign-in');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         setCurrentData(filteredData.slice(indexOfFirstItem, indexOfLastItem));

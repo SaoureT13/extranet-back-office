@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { doRequest, urlBaseImage } from "../services/apiService";
-import { Link, useLoaderData } from "react-router-dom";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 
 export async function listUserLoader() {
     let data = null;
@@ -24,9 +24,18 @@ function ListUser() {
     const itemPerPage = 5;
     const [filteredData, setFilteredData] = useState(data);
     const [currentData, setCurrentData] = useState([]);
-
     let indexOfLastItem = currentPage * itemPerPage;
     let indexOfFirstItem = indexOfLastItem - itemPerPage;
+    const navigate = useNavigate();
+
+    
+    useEffect(() => {
+        const user = localStorage.getItem("user");
+
+        if (!user) {
+            navigate("//sign-in");
+        }
+    }, [navigate]);
 
     useEffect(() => {
         setCurrentData(filteredData.slice(indexOfFirstItem, indexOfLastItem));

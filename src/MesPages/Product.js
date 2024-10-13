@@ -68,6 +68,15 @@ function Product() {
         showSuccess: false,
     });
 
+    useEffect(() => {
+        const user = localStorage.getItem("user");
+
+        if (!user) {
+            navigate("//sign-in");
+        }
+    }, [navigate]);
+    
+
     const handleProductSelectChange = (selected) => {
         setProductSelectData(selected);
     };

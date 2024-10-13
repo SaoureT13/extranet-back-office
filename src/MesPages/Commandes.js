@@ -1,6 +1,6 @@
-import { Link, useLoaderData } from "react-router-dom";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { doRequest } from "../services/apiService";
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 
 export async function commandesLoader() {
     let data = null;
@@ -20,24 +20,16 @@ export async function commandesLoader() {
 
 function Commandes() {
     const { data } = useLoaderData();
-    const renderRows = (clientData) => {
-        const orders = Object.entries(clientData).filter(
-            ([key]) => key !== "clientEncours"
-        );
-        const rowSpan = orders.length;
 
-        return orders.map(([key, order], index) => (
-            <tr key={key}>
-                <td>{order.lg_commid}</td>
-                <td>{order.dbl_commmtht ? order.dbl_commmtht : "N/A" }</td>
-                <td>{order.dbl_commmtttc ? order.dbl_commmtttc : "N/A"}</td>
-                <td>{order.dt_commupdated ? order.dt_commupdated : "N/A"}</td>
-                {index === 0 && (
-                    <td rowSpan={rowSpan}>{clientData.clientEncours}</td>
-                )}
-            </tr>
-        ));
-    };
+    const navigate = useNavigate();
+    useEffect(() => {
+        const user = localStorage.getItem("user");
+
+        if (!user) {
+            navigate("//sign-in");
+        }
+    }, [navigate]);
+
     return (
         <div className="row">
             <div className="col-lg-12">
@@ -130,12 +122,26 @@ function Commandes() {
                                     >
                                         {data.map((clientData, index) => (
                                             <tr key={index}>
-                                                <td>{clientData.str_socname}</td>
-                                                <td>{clientData.str_commname}</td>
-                                                <td>{clientData.dbl_commmtht}</td>
-                                                <td>{clientData.dbl_commmtttc}</td>
-                                                <td>{clientData.dt_commcreated}</td>
-                                                <td>{clientData.clientEncours ? clientData.clientEncours : "N/A"}</td>
+                                                <td>
+                                                    {clientData.str_socname}
+                                                </td>
+                                                <td>
+                                                    {clientData.str_commname}
+                                                </td>
+                                                <td>
+                                                    {clientData.dbl_commmtht}
+                                                </td>
+                                                <td>
+                                                    {clientData.dbl_commmtttc}
+                                                </td>
+                                                <td>
+                                                    {clientData.dt_commcreated}
+                                                </td>
+                                                <td>
+                                                    {clientData.clientEncours
+                                                        ? clientData.clientEncours
+                                                        : "N/A"}
+                                                </td>
                                             </tr>
                                         ))}
                                         {/* {Object.entries(data).map(

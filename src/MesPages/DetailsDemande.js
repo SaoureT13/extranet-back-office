@@ -1,8 +1,8 @@
-import { useLoaderData, useParams } from "react-router-dom";
+import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 import CustomAppMenu from "../Mescomposants/CustomAppMenu";
 import TopBar from "../Mescomposants/TopBar";
 import { doRequest, urlBaseImage } from "../services/apiService";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const detailsDemandeLoader = async ({ params }) => {
     let data = null;
@@ -21,6 +21,15 @@ export const detailsDemandeLoader = async ({ params }) => {
 };
 
 function DetailsDemande() {
+    const navigate = useNavigate();
+    useEffect(() => {
+        const user = localStorage.getItem("user");
+
+        if (!user) {
+            navigate("//sign-in");
+        }
+    }, [navigate]);
+
     function handleNextTab(e) {
         e.preventDefault();
         const tabs = document.querySelectorAll(".my-step");
@@ -89,7 +98,7 @@ function DetailsDemande() {
         } catch (error) {
             console.log(error);
         }
-        console.log(data)
+        console.log(data);
     };
 
     const handleRejectRequest = async (clientID) => {
@@ -112,7 +121,7 @@ function DetailsDemande() {
     const { data } = useLoaderData();
 
     const [currentData, setCurrentData] = useState(data);
-    console.log(currentData)
+    console.log(currentData);
 
     const files = currentData?.gallery.split(",");
 

@@ -7,6 +7,7 @@ import {
     Route,
     useLocation,
     RouterProvider,
+    Navigate,
 } from "react-router-dom";
 import Accueil from "./MesPages/Accueil";
 import Form from "./MesPages/Form";
@@ -43,6 +44,10 @@ const router = createBrowserRouter(
             path: "/dashboard",
             element: <Dashboard />,
             children: [
+                {
+                    index: true,
+                    element: <Navigate to={"/dashboard/demandes-clients/toutes"}/>,
+                },
                 {
                     path: "/dashboard/demandes-clients/toutes",
                     loader: demandesLoader,

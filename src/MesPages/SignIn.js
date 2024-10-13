@@ -42,7 +42,7 @@ function SignIn() {
             if (response.data.code_statut === "1") {
                 console.log(response.data[0]);
                 localStorage.setItem("user", JSON.stringify(response.data));
-                navigate("/dashboard/demandes-clients");
+                navigate("/dashboard/demandes-clients/toutes");
             } else {
                 handleShow();
             }

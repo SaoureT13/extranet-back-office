@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { doRequest } from "../services/apiService";
-import { useLoaderData, Link } from "react-router-dom";
+import { useLoaderData, Link, useNavigate } from "react-router-dom";
 
 export const detailsUserLoader = async ({ params }) => {
     let data = null;
@@ -20,6 +20,16 @@ export const detailsUserLoader = async ({ params }) => {
 
 function DetailsUser() {
     const { data } = useLoaderData();
+    const navigate = useNavigate();
+
+
+    useEffect(() => {
+        const user = localStorage.getItem("user");
+
+        if (!user) {
+            navigate("//sign-in");
+        }
+    }, [navigate]);
 
     const profile = {
         "13121316382501833409": "Designer",

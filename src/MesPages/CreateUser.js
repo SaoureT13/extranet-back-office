@@ -4,7 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { doRequest, urlBaseImage } from "../services/apiService";
 import { useDataStore } from "../store/state";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 const schema = yup
     .object({
@@ -59,6 +59,18 @@ function CreateUser() {
         showError: false,
         showSuccess: false,
     });
+    const navigate = useNavigate();
+
+
+    useEffect(() => {
+        const user = localStorage.getItem("user");
+
+        if (!user) {
+            navigate("//sign-in");
+        }
+    }, [navigate]);
+
+
     let currentUser = JSON.parse(localStorage.getItem("user"));
 
     const handleSetShowError = () => {

@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/extranetBackoffice/static/css/main.0adbe797.css",
+    "main.js": "/extranetBackoffice/static/js/main.e1f67447.js",
+    "static/js/453.de6ac2c5.chunk.js": "/extranetBackoffice/static/js/453.de6ac2c5.chunk.js",
+    "index.html": "/extranetBackoffice/index.html",
+    "main.0adbe797.css.map": "/extranetBackoffice/static/css/main.0adbe797.css.map",
+    "main.e1f67447.js.map": "/extranetBackoffice/static/js/main.e1f67447.js.map",
+    "453.de6ac2c5.chunk.js.map": "/extranetBackoffice/static/js/453.de6ac2c5.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0adbe797.css",
+    "static/js/main.e1f67447.js"
+  ]
+}

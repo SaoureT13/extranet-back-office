@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Select from "react-select";
 
 const options = [
@@ -9,6 +9,14 @@ const options = [
 ];
 
 function Planning() {
+    const navigate = useNavigate();
+    useEffect(() => {
+        const user = localStorage.getItem("user");
+
+        if (!user) {
+            navigate("//sign-in");
+        }
+    }, [navigate]);
     return (
         <div className="row justify-content-center">
             <div className="col-xxl-9">
@@ -87,9 +95,7 @@ function Planning() {
                                         className="form-select"
                                         defaultValue=""
                                     >
-                                        <option selected="">
-                                            Centre-Nord
-                                        </option>
+                                        <option selected="">Centre-Nord</option>
                                         <option>Open this select menu</option>
                                         <option>Open this select menu</option>
                                         <option>Open this select menu</option>

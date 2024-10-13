@@ -8,6 +8,7 @@ const TopBar = () => {
     const { theme, toggleTheme } = useTheme();
     let currentUser = JSON.parse(localStorage.getItem("user"));
     const navigate = useNavigate();
+   
 
     const profile = {
         "13121316382501833409": "Designer",
@@ -867,10 +868,10 @@ const TopBar = () => {
                                         />
                                         <span className="text-start ms-xl-2">
                                             <span className="d-none d-xl-inline-block ms-1 fw-medium user-name-text">
-                                                {currentUser.STR_UTIFIRSTLASTNAME}
+                                                {currentUser?.STR_UTIFIRSTLASTNAME}
                                             </span>
                                             <span className="d-none d-xl-block ms-1 fs-12 user-name-sub-text">
-                                                {profile[currentUser.LG_PROID]}
+                                                {profile[currentUser?.LG_PROID]}
                                             </span>
                                         </span>
                                     </span>
@@ -878,7 +879,7 @@ const TopBar = () => {
                                 <div className="dropdown-menu dropdown-menu-end">
                                     {/* item*/}
                                     <h6 className="dropdown-header">
-                                      Bienvenu {currentUser.STR_UTILOGIN} 
+                                      Bienvenu {currentUser?.STR_UTILOGIN} 
                                     </h6>
                                     <a
                                         className="dropdown-item"
